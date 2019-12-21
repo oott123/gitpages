@@ -42,6 +42,7 @@ func Get() *Config {
 func Read() (*Config, error) {
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
+	viper.AddConfigPath("config")
 
 	err := viper.ReadInConfig()
 	if err != nil {
