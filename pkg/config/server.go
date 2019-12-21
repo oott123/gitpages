@@ -10,7 +10,7 @@ type Server struct {
 	Host string
 	// Remote is the git repo to serve; e.g. https://github.com/ghost/example.git
 	Remote string
-	// WebHookSecret is the secret used by web hook; your web hook endpoint will be your host /gitpages-cgi/{your_secret}
+	// WebHookSecret is the secret used by web hook; your web hook endpoint will be your host /_gitpages/update/{your_secret}
 	WebHookSecret string
 	// Branch is the deploy target branch from the git repo
 	Branch string

@@ -11,6 +11,7 @@ import (
 func main() {
 	r := gin.Default()
 
+	r.Any("/_gitpages/update/:secret", router.WebHook)
 	r.Use(router.Main)
 
 	cfg := config.Get()
