@@ -13,6 +13,16 @@ import (
 var _ http.Handler = (*FileServer)(nil)
 
 func (f *FileServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if containsDotDot(r.URL.Path) {
+		// Too many programs use r.URL.Path to construct the argument to
+		// serveFile. Reject the request under the assumption that happened
+		// here and ".." may not be wanted.
+		// Note that name might not contain "..", for example if code (still
+		// incorrectly) used filepath.Join(myDir, r.URL.Path).
+		http.Error(w, "invalid URL path", http.StatusBadRequest)
+		return
+	}
+
 	filename := f.Resolve(r.URL.Path)
 	stat, statErr := os.Stat(filename)
 	accessConfig := f.AccessConfig(r)
@@ -25,9 +35,8 @@ func (f *FileServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		varyHeader = append(varyHeader, v)
 	}
 
-	if !accessConfig.AllowDotFiles {
-		pieces := strings.Split(filename, string(os.PathSeparator))
-		for _, p := range pieces {
+	if !accessConfig.AllowDotFiles && strings.Contains(filename, ".") {
+		for _, p := range strings.FieldsFunc(filename, isSlashRune) {
 			if strings.Index(p, ".") == 0 {
 				// is dotfile
 				f.log.Debugf("%s is dotfile, not allowed", filename)
@@ -108,3 +117,17 @@ func (f *FileServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func containsDotDot(v string) bool {
+	if !strings.Contains(v, "..") {
+		return false
+	}
+	for _, ent := range strings.FieldsFunc(v, isSlashRune) {
+		if ent == ".." {
+			return true
+		}
+	}
+	return false
+}
+
+func isSlashRune(r rune) bool { return r == '/' || r == '\\' }
