@@ -16,6 +16,8 @@ type Server struct {
 	Branch string
 	// Dir is the serve root
 	Dir string
+	// AllowSymlink will allow symlinks point to files out of the git repo
+	AllowSymlink bool
 }
 
 func (s *Server) MatchHost(host string) bool {

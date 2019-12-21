@@ -16,6 +16,6 @@ func Main(c *gin.Context) {
 	repo.TreeRLock()
 	defer repo.TreeRUnlock()
 
-	handler := *repo.HttpHandler()
+	handler := repo.HttpHandler()
 	handler.ServeHTTP(c.Writer, c.Request)
 }

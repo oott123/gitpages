@@ -11,13 +11,13 @@ import (
 )
 
 type Repo struct {
-	srv      *config.Server
-	baseDir  string
-	bareLock *sync.RWMutex
-	treeLock *sync.RWMutex
-	git      *git.Repository
-	log      *zap.SugaredLogger
-	httpHandler *http.Handler
+	srv         *config.Server
+	baseDir     string
+	bareLock    *sync.RWMutex
+	treeLock    *sync.RWMutex
+	git         *git.Repository
+	log         *zap.SugaredLogger
+	httpHandler http.Handler
 }
 
 func New(cfg *config.Server, baseDir string) (*Repo, error) {
@@ -30,11 +30,10 @@ func New(cfg *config.Server, baseDir string) (*Repo, error) {
 		return nil, fmt.Errorf("cannot create repo %s for empty origin", cfg.Host)
 	}
 
-
 	repo := Repo{srv: cfg, bareLock: &sync.RWMutex{}, treeLock: &sync.RWMutex{}, log: logger.New(), baseDir: baseDir}
 
 	httpHandler := http.FileServer(http.Dir(repo.ServeDir()))
-	repo.httpHandler = &httpHandler
-	
+	repo.httpHandler = httpHandler
+
 	return &repo, nil
 }

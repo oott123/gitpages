@@ -29,11 +29,11 @@ func (r *Repo) Clone() error {
 	r.log.Debugf("cloning git repo %s at %s", r.srv.Remote, bareDir)
 
 	gr, err := git.Clone(bare, tree, &git.CloneOptions{
-		URL:               r.srv.Remote,
-		Auth:              nil,
-		RemoteName:        "origin",
-		NoCheckout:        true,
-		Depth:             1,
+		URL:        r.srv.Remote,
+		Auth:       nil,
+		RemoteName: "origin",
+		NoCheckout: true,
+		// Don't use shallow clone; we can't update shallow clones https://github.com/src-d/go-git/issues/1143
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
 		Progress:          nil,
 		Tags:              git.NoTags,

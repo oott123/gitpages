@@ -2,22 +2,22 @@ package config
 
 type Config struct {
 	// Endpoint is where GitPages will listened on
-	Endpoint string
+	Endpoint   string
 	StorageDir string
-	Servers []Server `toml:"server"`
+	Servers    []Server
 }
 
 func Default() Config {
 	return Config{
-		Endpoint: ":2289",
+		Endpoint:   ":2289",
 		StorageDir: "data",
 		Servers: []Server{
 			{
-				Host: "*",
-				Remote: "https://github.com/Yelp/yelp.github.io.git",
-				WebHookSecret: "example",
-				Branch: "master",
-				Dir: "/",
+				Host:          "*",
+				Remote:        "https://github.com/oott123/gitpages-example.git",
+				WebHookSecret: "gitpages",
+				Branch:        "master",
+				Dir:           "/",
 			},
 		},
 	}
