@@ -1,6 +1,6 @@
 # GitPages
 
-Serve static file from your git repo.
+Serve static files from your git repo.
 Update with webhooks.
 Customize with `.gitpages.toml` files just in your repo.
 
@@ -10,7 +10,7 @@ TBD
 
 ## Config
 
-TDB
+TBD
 
 ## License
 
