@@ -14,16 +14,6 @@ import (
 var _ http.Handler = (*FileServer)(nil)
 
 func (f *FileServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if containsDotDot(r.URL.Path) {
-		// Too many programs use r.URL.Path to construct the argument to
-		// serveFile. Reject the request under the assumption that happened
-		// here and ".." may not be wanted.
-		// Note that name might not contain "..", for example if code (still
-		// incorrectly) used filepath.Join(myDir, r.URL.Path).
-		http.Error(w, "invalid URL path", http.StatusBadRequest)
-		return
-	}
-
 	filename := f.Resolve(r.URL.Path)
 	stat, statErr := os.Stat(filename)
 	accessConfig := f.AccessConfig(r)
@@ -66,22 +56,22 @@ func (f *FileServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if filename == "" || !allowAccess {
-		http.Error(w, "access denied", 403)
+		f.serveForbidden(w, r, "access denied", accessConfig)
 		return
-	} else if os.IsNotExist(statErr) {
+	} else if os.IsNotExist(statErr) || stat == nil {
 		// 404 fall through
 	} else if stat.IsDir() {
 		// directory
 		indexFilename := path.Join(filename, "index.html")
 		if _, err := os.Stat(indexFilename); os.IsNotExist(err) && !accessConfig.AllowListDirectory {
-			http.Error(w, "directory listing is not allowed", 403)
+			f.serveForbidden(w, r, "directory listing is not allowed", accessConfig)
 		} else {
-			http.ServeFile(w, r, filename)
+			f.serveFile(w, r, filename, stat, accessConfig)
 		}
 		return
 	} else {
-		f.setMime(w, filename)
-		http.ServeFile(w, r, filename)
+		// 200 OK for regular files
+		f.serveFile(w, r, filename, stat, accessConfig)
 		return
 	}
 
@@ -93,7 +83,7 @@ func (f *FileServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := os.Stat(filename); filename != "" && err == nil {
-		f.setMime(w, filename)
+		f.setMime(w, filename, accessConfig)
 		w.Header().Del("Date")
 		w.Header().Del("Last-Modified")
 		w.Header().Set("Cache-Control", "no-cache")
@@ -111,7 +101,41 @@ func (f *FileServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (f *FileServer) setMime(w http.ResponseWriter, filename string) {
+func (f *FileServer) serveFile(w http.ResponseWriter, r *http.Request, filename string, stat os.FileInfo, accessConfig *AccessConfig) {
+	if !stat.IsDir() {
+		f.setMime(w, filename, accessConfig)
+	}
+	http.ServeFile(w, r, filename)
+}
+
+func (f *FileServer) serveForbidden(w http.ResponseWriter, r *http.Request, reason string, accessConfig *AccessConfig) {
+	w.Header().Del("Date")
+	w.Header().Del("Last-Modified")
+	w.Header().Set("Cache-Control", "no-cache")
+
+	filename := ""
+	if accessConfig.ForbiddenErrorPage != "" {
+		filename = f.Resolve(accessConfig.ForbiddenErrorPage)
+	}
+
+	if filename != "" {
+		f.setMime(w, filename, accessConfig)
+		w.WriteHeader(403)
+
+		file, err := os.Open(filename)
+		defer file.Close()
+		if err != nil {
+			f.log.Errorf("error while opening 403 file: %s", err)
+			http.Error(w, "403 Forbidden", 403)
+			return
+		}
+		_, _ = io.Copy(w, file)
+	} else {
+		http.Error(w, reason, 403)
+	}
+}
+
+func (f *FileServer) setMime(w http.ResponseWriter, filename string, accessConfig *AccessConfig) {
 	ext := filepath.Ext(filename)
 	mType := gomime.TypeByExtension(ext)
 	if mType == "" {
@@ -124,17 +148,3 @@ func (f *FileServer) setMime(w http.ResponseWriter, filename string) {
 
 	w.Header().Set("Content-Type", mType)
 }
-
-func containsDotDot(v string) bool {
-	if !strings.Contains(v, "..") {
-		return false
-	}
-	for _, ent := range strings.FieldsFunc(v, isSlashRune) {
-		if ent == ".." {
-			return true
-		}
-	}
-	return false
-}
-
-func isSlashRune(r rune) bool { return r == '/' || r == '\\' }

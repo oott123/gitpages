@@ -21,6 +21,8 @@ type AccessConfig struct {
 	AllowListDirectory bool
 	// if NotFoundErrorPage is defined, 404 will be sent to this file (relative to site root); else will be sent to 404.html
 	NotFoundErrorPage string
+	// if NotFoundErrorPage is defined, 403 will be sent to this file (relative to site root); else will get plain text
+	ForbiddenErrorPage string
 	// if Match is defined, regexps should be matched before matching rules defined in current and children access config; not allowed on the top most config file
 	Match *mregex.Regexp
 	// Rules is children rules used for detailed access config; only allowed on the top most config file
@@ -38,8 +40,6 @@ type AccessConfig struct {
 	HotlinkProtection bool
 	// TBD: no implementation, don't use it now
 	HotlinkOrigins []string
-	// TBD: no implementation, don't use it now
-	ForbiddenErrorPage string
 }
 
 func (ac *AccessConfig) MatchPattern(path string) bool {
@@ -59,7 +59,7 @@ func (ac *AccessConfig) EvaluateForPath(path string) *AccessConfig {
 
 	rule := ac
 	for _, r := range ac.Rules {
-		if len(rule.Rules) > 0 {
+		if len(r.Rules) > 0 {
 			log.Warnf("ignoring `Rules` %#v, `Rules` can only set on root element", rule.Rules)
 		}
 		if r.MatchPattern(path) {

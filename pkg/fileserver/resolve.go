@@ -8,6 +8,10 @@ import (
 )
 
 func (f *FileServer) Resolve(requestPath string) string {
+	if containsDotDot(requestPath) {
+		return ""
+	}
+
 	root, err := filepath.Abs(f.serverConfig.Root)
 	if err != nil {
 		f.log.Warnf("root dir %s abs failed: %s", root, err)
@@ -55,3 +59,17 @@ func (f *FileServer) Resolve(requestPath string) string {
 	}
 	return ""
 }
+
+func containsDotDot(v string) bool {
+	if !strings.Contains(v, "..") {
+		return false
+	}
+	for _, ent := range strings.FieldsFunc(v, isSlashRune) {
+		if ent == ".." {
+			return true
+		}
+	}
+	return false
+}
+
+func isSlashRune(r rune) bool { return r == '/' || r == '\\' }
