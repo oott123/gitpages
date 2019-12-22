@@ -1,8 +1,8 @@
 package repoman
 
 import (
+	"github.com/BurntSushi/toml"
 	"github.com/oott123/gitpages/pkg/fileserver"
-	"github.com/pelletier/go-toml"
 	"io/ioutil"
 	"os"
 	"path"
