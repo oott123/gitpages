@@ -8,16 +8,19 @@ import (
 	"gopkg.in/src-d/go-git.v4"
 	"net/http"
 	"sync"
+	"time"
 )
 
 type Repo struct {
-	srv         *config.Server
-	baseDir     string
-	bareLock    *sync.RWMutex
-	treeLock    *sync.RWMutex
-	git         *git.Repository
-	log         *zap.SugaredLogger
-	httpHandler http.Handler
+	srv                *config.Server
+	baseDir            string
+	bareLock           *sync.RWMutex
+	treeLock           *sync.RWMutex
+	git                *git.Repository
+	log                *zap.SugaredLogger
+	httpHandler        http.Handler
+	updateTicker       *time.Ticker
+	updateTickerCancel *chan bool
 }
 
 func New(cfg *config.Server, baseDir string) (*Repo, error) {
@@ -38,6 +41,13 @@ func New(cfg *config.Server, baseDir string) (*Repo, error) {
 
 	httpHandler := http.FileServer(http.Dir(repo.ServeDir()))
 	repo.httpHandler = httpHandler
+
+	if cfg.UpdateInterval > 1*time.Second {
+		repo.updateTicker = time.NewTicker(cfg.UpdateInterval)
+		ch := make(chan bool)
+		repo.updateTickerCancel = &ch
+		go repo.tick()
+	}
 
 	return &repo, nil
 }

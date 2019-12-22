@@ -7,6 +7,10 @@ func MatchHost(host string) *repo.Repo {
 	defer repoLock.RUnlock()
 
 	for _, r := range repos {
+		if r == nil {
+			continue
+		}
+
 		if r.MatchHost(host) {
 			log.Debugf("host %s matched repo %s", host, r.String())
 			return r

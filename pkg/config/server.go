@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/minio/minio/pkg/wildcard"
 	"strings"
+	"time"
 )
 
 type Server struct {
@@ -18,6 +19,8 @@ type Server struct {
 	Dir string
 	// AllowSymlink will allow symlinks point to files out of the git repo
 	AllowSymlink bool
+	// UpdateInterval is the update interval which we used to pull repo periodically; if 0 is given, repo will only update on start or webhook triggered
+	UpdateInterval time.Duration
 }
 
 func (s *Server) MatchHost(host string) bool {
