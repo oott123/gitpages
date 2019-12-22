@@ -27,13 +27,18 @@ type AccessConfig struct {
 	Rules AccessRules
 	// Break will stop eval next rules
 	Break bool
-	// Don't use for now
+
+	// TBD: no implementation, don't use it now
+	CacheControl string
+	// TBD: no implementation, don't use it now
 	ContentType string
-	// Don't use for now
+	// TBD: no implementation, don't use it now
+	DefaultContentType string
+	// TBD: no implementation, don't use it now
 	HotlinkProtection bool
-	// Don't use for now
+	// TBD: no implementation, don't use it now
 	HotlinkOrigins []string
-	// Don't use for now
+	// TBD: no implementation, don't use it now
 	ForbiddenErrorPage string
 }
 
