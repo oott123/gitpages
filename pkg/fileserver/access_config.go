@@ -35,11 +35,9 @@ type AccessConfig struct {
 	CrossSiteProtection bool
 	// if CrossSiteProtectionOnlyEmptyReferrer is enabled, cross site protection will only enabled when referrer is empty
 	CrossSiteProtectionOnlyEmptyReferrer bool
-	// TBD: no implementation, don't use it now
-	DefaultContentType string
-	// TBD: no implementation, don't use it now
+	// if ReferrerProtection is enabled, any referrer not on the ReferrerAllowed list will result 403; this include empty referrer
 	ReferrerProtection bool
-	// TBD: no implementation, don't use it now
+	// if ReferrerProtection is enabled, any referrer not on the ReferrerAllowed list will result 403; this include empty referrer
 	ReferrerAllowed []mregex.Regexp
 }
 

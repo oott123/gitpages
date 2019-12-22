@@ -51,9 +51,13 @@ func (f *FileServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if accessConfig.CrossSiteProtection || accessConfig.ReferrerProtection {
+		varyHeader = append(varyHeader, "Referer")
+	}
+
 	if accessConfig.CrossSiteProtection {
-		varyHeader = append(varyHeader, "Referrer", "Sec-Fetch-Dest", "Sec-Fetch-Site", "Sec-Fetch-Mode")
-		if r.Header.Get("Referrer") != "" || accessConfig.CrossSiteProtectionOnlyEmptyReferrer {
+		varyHeader = append(varyHeader, "Sec-Fetch-Dest", "Sec-Fetch-Site", "Sec-Fetch-Mode")
+		if r.Header.Get("Referer") != "" || accessConfig.CrossSiteProtectionOnlyEmptyReferrer {
 			fetchDest := r.Header.Get("Sec-Fetch-Dest")
 			fetchSite := r.Header.Get("Sec-Fetch-Site")
 			fetchMode := r.Header.Get("Sec-Fetch-Mode")
@@ -61,6 +65,16 @@ func (f *FileServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				if fetchDest != "empty" && fetchDest != "document" {
 					allowAccess = false
 				}
+			}
+		}
+	}
+
+	if accessConfig.ReferrerProtection {
+		referrer := r.Header.Get("Referer")
+		allowAccess = false
+		for _, r := range accessConfig.ReferrerAllowed {
+			if r.MatchString(referrer) {
+				allowAccess = true
 			}
 		}
 	}
