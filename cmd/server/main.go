@@ -1,11 +1,13 @@
 package main
 
 import (
+	"github.com/bep/debounce"
 	"github.com/gin-gonic/gin"
 	"github.com/oott123/gitpages/internal/app/repoman"
 	"github.com/oott123/gitpages/internal/app/router"
 	"github.com/oott123/gitpages/pkg/config"
 	"github.com/oott123/gitpages/pkg/logger"
+	"time"
 )
 
 func main() {
@@ -24,6 +26,21 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	reloadConfig := func() {
+		log.Infof("config changed, reloading...")
+		err := repoman.ReloadRepos()
+		if err != nil {
+			log.Errorf("failed to reload config: %s", err)
+		} else {
+			log.Infof("reloaded config")
+		}
+	}
+	debounced := debounce.New(100 * time.Millisecond)
+
+	config.Watch(func(c *config.Config) {
+		debounced(reloadConfig)
+	})
 
 	go log.Infof("trying to handle request on %s", cfg.Endpoint)
 	err = r.Run(cfg.Endpoint)

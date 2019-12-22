@@ -8,6 +8,7 @@ func MatchHost(host string) *repo.Repo {
 
 	for _, r := range repos {
 		if r.MatchHost(host) {
+			log.Debugf("host %s matched repo %s", host, r.String())
 			return r
 		}
 	}

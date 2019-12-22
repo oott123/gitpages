@@ -28,8 +28,8 @@ func ReloadRepos() error {
 	newRepos := make([]*repo.Repo, len(cfg.Servers))
 
 	for i, c := range cfg.Servers {
-		srv := &c
-		r, err := repo.New(srv, cfg.StorageDir)
+		srv := c
+		r, err := repo.New(&srv, cfg.StorageDir)
 		if err != nil {
 			return fmt.Errorf("reload create repo error: %w", err)
 		}
@@ -44,12 +44,12 @@ func ReloadRepos() error {
 		}
 
 		accessConfig := ParseAccessConfig(r.ServeDir())
-		serverConfig := &fileserver.ServerConfig{
+		serverConfig := fileserver.ServerConfig{
 			Root:         r.ServeDir(),
 			AllowSymlink: c.AllowSymlink,
 		}
 
-		fsrv, err := fileserver.New(serverConfig, accessConfig)
+		fsrv, err := fileserver.New(&serverConfig, accessConfig)
 		if err != nil {
 			return fmt.Errorf("reload create fileserver error: %w", err)
 		}

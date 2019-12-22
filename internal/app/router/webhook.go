@@ -20,6 +20,11 @@ func WebHook(c *gin.Context) {
 		return
 	}
 
+	if repo.WebHookSecret() == "" {
+		_ = c.AbortWithError(400, fmt.Errorf("secret is not set in config file"))
+		return
+	}
+
 	if !timingSafeCompareString(secret, repo.WebHookSecret()) {
 		_ = c.AbortWithError(403, fmt.Errorf("secret is invalid"))
 		return

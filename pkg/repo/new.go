@@ -30,6 +30,10 @@ func New(cfg *config.Server, baseDir string) (*Repo, error) {
 		return nil, fmt.Errorf("cannot create repo %s for empty origin", cfg.Host)
 	}
 
+	if cfg.Branch == "" {
+		cfg.Branch = "master"
+	}
+
 	repo := Repo{srv: cfg, bareLock: &sync.RWMutex{}, treeLock: &sync.RWMutex{}, log: logger.New(), baseDir: baseDir}
 
 	httpHandler := http.FileServer(http.Dir(repo.ServeDir()))

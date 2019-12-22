@@ -94,7 +94,7 @@ func (f *FileServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		filename = f.Resolve("/404.html")
 	}
 
-	if filename != "" {
+	if _, err := os.Stat(filename); filename != "" && err == nil {
 		ext := filepath.Ext(filename)
 		mType := mime.TypeByExtension(ext)
 		if mType == "" {
