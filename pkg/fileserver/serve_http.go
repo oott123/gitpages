@@ -84,7 +84,11 @@ func (f *FileServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for k, v := range accessConfig.AddHeaders {
-		w.Header().Set(k, v)
+		if v == "" {
+			w.Header().Del(v)
+		} else {
+			w.Header().Set(k, v)
+		}
 	}
 
 	if filename == "" || !allowAccess {
