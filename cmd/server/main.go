@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/oott123/gitpages/internal/app/repoman"
 	"github.com/oott123/gitpages/internal/app/router"
+	"github.com/oott123/gitpages/internal/middlewares"
 	"github.com/oott123/gitpages/pkg/config"
 	"github.com/oott123/gitpages/pkg/logger"
 	"time"
@@ -12,6 +13,7 @@ import (
 
 func main() {
 	r := gin.Default()
+	r.Use(middlewares.ErrorHandler, middlewares.HeadersHandler)
 
 	r.GET("/_gitpages/update/:secret", router.WebHook)
 	r.POST("/_gitpages/update/:secret", router.WebHook)

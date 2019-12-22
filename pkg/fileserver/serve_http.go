@@ -55,6 +55,10 @@ func (f *FileServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Vary", strings.Join(varyHeader, ", "))
 	}
 
+	for k, v := range accessConfig.AddHeaders {
+		w.Header().Set(k, v)
+	}
+
 	if filename == "" || !allowAccess {
 		f.serveForbidden(w, r, "access denied", accessConfig)
 		return

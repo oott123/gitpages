@@ -29,11 +29,8 @@ type AccessConfig struct {
 	Rules AccessRules
 	// Break will stop eval next rules
 	Break bool
-
-	// TBD: no implementation, don't use it now
-	CacheControl string
-	// TBD: no implementation, don't use it now
-	ContentType string
+	// AddHeaders will add headers to response
+	AddHeaders map[string]string
 	// TBD: no implementation, don't use it now
 	DefaultContentType string
 	// TBD: no implementation, don't use it now
