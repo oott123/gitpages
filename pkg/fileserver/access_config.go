@@ -31,12 +31,16 @@ type AccessConfig struct {
 	Break bool
 	// AddHeaders will add headers to response
 	AddHeaders map[string]string
+	// if CrossSiteProtection is enabled, limit cross-site fetch in no-cors mode requests
+	CrossSiteProtection bool
+	// if CrossSiteProtectionOnlyEmptyReferrer is enabled, cross site protection will only enabled when referrer is empty
+	CrossSiteProtectionOnlyEmptyReferrer bool
 	// TBD: no implementation, don't use it now
 	DefaultContentType string
 	// TBD: no implementation, don't use it now
-	HotlinkProtection bool
+	ReferrerProtection bool
 	// TBD: no implementation, don't use it now
-	HotlinkOrigins []string
+	ReferrerAllowed []mregex.Regexp
 }
 
 func (ac *AccessConfig) MatchPattern(path string) bool {

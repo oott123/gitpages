@@ -51,6 +51,20 @@ func (f *FileServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if accessConfig.CrossSiteProtection {
+		varyHeader = append(varyHeader, "Referrer", "Sec-Fetch-Dest", "Sec-Fetch-Site", "Sec-Fetch-Mode")
+		if r.Header.Get("Referrer") != "" || accessConfig.CrossSiteProtectionOnlyEmptyReferrer {
+			fetchDest := r.Header.Get("Sec-Fetch-Dest")
+			fetchSite := r.Header.Get("Sec-Fetch-Site")
+			fetchMode := r.Header.Get("Sec-Fetch-Mode")
+			if fetchSite == "cross-site" && fetchMode == "no-cors" {
+				if fetchDest != "empty" && fetchDest != "document" {
+					allowAccess = false
+				}
+			}
+		}
+	}
+
 	if len(varyHeader) > 0 {
 		w.Header().Set("Vary", strings.Join(varyHeader, ", "))
 	}
