@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/bep/debounce v1.2.0
+	github.com/cubewise-code/go-mime v0.0.0-20190322015324-9c5316ef3e8e
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/gin-gonic/gin v1.5.0
 	github.com/minio/minio v0.0.0-20191219225819-dc1eb57f4e23

@@ -1,8 +1,9 @@
 package fileserver
 
 import (
+	"fmt"
+	gomime "github.com/cubewise-code/go-mime"
 	"io"
-	"mime"
 	"net/http"
 	"os"
 	"path"
@@ -72,17 +73,14 @@ func (f *FileServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	} else if stat.IsDir() {
 		// directory
 		indexFilename := path.Join(filename, "index.html")
-		if _, err := os.Stat(indexFilename); os.IsNotExist(err) {
-			if accessConfig.AllowListDirectory {
-				http.ServeFile(w, r, filename)
-			} else {
-				http.Error(w, "directory listing is not allowed", 403)
-			}
+		if _, err := os.Stat(indexFilename); os.IsNotExist(err) && !accessConfig.AllowListDirectory {
+			http.Error(w, "directory listing is not allowed", 403)
 		} else {
 			http.ServeFile(w, r, filename)
 		}
 		return
 	} else {
+		f.setMime(w, filename)
 		http.ServeFile(w, r, filename)
 		return
 	}
@@ -95,12 +93,7 @@ func (f *FileServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := os.Stat(filename); filename != "" && err == nil {
-		ext := filepath.Ext(filename)
-		mType := mime.TypeByExtension(ext)
-		if mType == "" {
-			mType = "text/plain"
-		}
-		w.Header().Set("Content-Type", mType)
+		f.setMime(w, filename)
 		w.Header().Del("Date")
 		w.Header().Del("Last-Modified")
 		w.Header().Set("Cache-Control", "no-cache")
@@ -116,6 +109,20 @@ func (f *FileServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		_, _ = io.Copy(w, file)
 		return
 	}
+}
+
+func (f *FileServer) setMime(w http.ResponseWriter, filename string) {
+	ext := filepath.Ext(filename)
+	mType := gomime.TypeByExtension(ext)
+	if mType == "" {
+		mType = "text/plain"
+	}
+
+	if mType == "application/javascript" || strings.Contains(mType, "text/") {
+		mType = fmt.Sprintf("%s; charset=utf-8", mType)
+	}
+
+	w.Header().Set("Content-Type", mType)
 }
 
 func containsDotDot(v string) bool {
