@@ -5,17 +5,18 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: ["linux", "darwin", "windows"]
+        arch: ["i386", "amd64"]
     steps:
-
     - name: Set up Go 1.13
       uses: actions/setup-go@v1
       with:
         go-version: 1.13
       id: go
-
     - name: Check out code into the Go module directory
       uses: actions/checkout@v1
-
     - name: Get dependencies
       run: |
         go get -v -t -d ./...
@@ -23,6 +24,13 @@ jobs:
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
             dep ensure
         fi
-
     - name: Build
-      run: go build -v -O gitpages-server github.com/oott123/gitpages/cmd/server
+      run: go build -v -o build/gitpages-server_${{ matrix.os }}_${{ matrix.arch }} github.com/oott123/gitpages/cmd/server
+      env:
+        GOOS: ${{ matrix.os }}
+        GOARCH: ${{ matrix.arch }}
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: build
+        path: build
