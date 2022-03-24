@@ -7,7 +7,7 @@ COPY go.sum ./
 RUN go get -v -t -d ./...
 
 COPY . ./
-RUN go build -o /gitpages
+RUN go build -v -o /gitpages github.com/oott123/gitpages/cmd/server
 
 
 FROM gcr.io/distroless/base-debian10
