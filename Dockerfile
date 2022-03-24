@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY go.mod ./
 COPY go.sum ./
-RUN go mod download
+RUN go get -v -t -d ./...
 
 COPY . ./
 RUN go build -o /gitpages
