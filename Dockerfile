@@ -1,4 +1,4 @@
-FROM golang:1.13-bullseye AS build
+FROM golang:1.13-buster AS build
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ COPY . ./
 RUN go build -o /gitpages
 
 
-FROM gcr.io/distroless/base-debian11
+FROM gcr.io/distroless/base-debian10
 WORKDIR /
 
 COPY --from=build /gitpages /gitpages
